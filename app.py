@@ -23,6 +23,7 @@ def save_watchlist(tickers):
 def get_stock_data(ticker):
     try:
         stock = yf.Ticker(ticker)
+
         hist = stock.history(period='5d')
         if len(hist) >= 2:
             price = round(float(hist['Close'].iloc[-1]), 2)
@@ -32,10 +33,26 @@ def get_stock_data(ticker):
             price = round(float(hist['Close'].iloc[-1]), 2)
             change_pct = None
         else:
-            return {'ticker': ticker, 'price': None, 'change_pct': None}
-        return {'ticker': ticker, 'price': price, 'change_pct': change_pct}
+            price = None
+            change_pct = None
+
+        info = stock.info
+        name = info.get('longName') or info.get('shortName') or ticker
+        fcf = info.get('freeCashflow')
+        fcf_billions = round(fcf / 1e9, 2) if fcf is not None else None
+        mkt_cap = info.get('marketCap')
+        mkt_cap_billions = round(mkt_cap / 1e9, 2) if mkt_cap is not None else None
+
+        return {
+            'ticker': ticker,
+            'name': name,
+            'price': price,
+            'change_pct': change_pct,
+            'fcf_billions': fcf_billions,
+            'mkt_cap_billions': mkt_cap_billions,
+        }
     except Exception:
-        return {'ticker': ticker, 'price': None, 'change_pct': None}
+        return {'ticker': ticker, 'name': ticker, 'price': None, 'change_pct': None, 'fcf_billions': None, 'mkt_cap_billions': None}
 
 
 @app.route('/')

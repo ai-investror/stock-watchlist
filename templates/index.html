@@ -79,13 +79,20 @@
                 <th>Ticker</th>
                 <th>Last Price</th>
                 <th>Change %</th>
+                <th>Mkt Cap</th>
+                <th>FCF TTM</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             {% for stock in stocks %}
             <tr>
-                <td><strong>{{ stock.ticker }}</strong></td>
+                <td>
+                    <strong>{{ stock.ticker }}</strong>
+                    {% if stock.name != stock.ticker %}
+                    <br><small style="color: #888;">{{ stock.name }}</small>
+                    {% endif %}
+                </td>
                 <td>
                     {% if stock.price %}
                         ${{ "%.2f"|format(stock.price) }}
@@ -98,6 +105,20 @@
                         <span class="{{ 'positive' if stock.change_pct >= 0 else 'negative' }}">
                             {{ '+' if stock.change_pct >= 0 else '' }}{{ "%.2f"|format(stock.change_pct) }}%
                         </span>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    {% if stock.mkt_cap_billions is not none %}
+                        ${{ stock.mkt_cap_billions }}B
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    {% if stock.fcf_billions is not none %}
+                        ${{ stock.fcf_billions }}B
                     {% else %}
                         —
                     {% endif %}
