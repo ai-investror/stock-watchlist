@@ -43,6 +43,8 @@ def get_stock_data(ticker):
         mkt_cap = info.get('marketCap')
         mkt_cap_billions = round(mkt_cap / 1e9, 2) if mkt_cap is not None else None
         p_fcf = round(mkt_cap / fcf, 1) if (mkt_cap is not None and fcf is not None and fcf > 0) else None
+        pe = info.get('trailingPE')
+        pe = round(pe, 1) if pe is not None else None
 
         return {
             'ticker': ticker,
@@ -52,6 +54,7 @@ def get_stock_data(ticker):
             'fcf_billions': fcf_billions,
             'mkt_cap_billions': mkt_cap_billions,
             'p_fcf': p_fcf,
+            'pe': pe,
         }
     except Exception:
         return {'ticker': ticker, 'name': ticker, 'price': None, 'change_pct': None, 'fcf_billions': None, 'mkt_cap_billions': None}

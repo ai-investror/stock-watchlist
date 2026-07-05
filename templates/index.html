@@ -82,6 +82,7 @@
                 <th>Mkt Cap</th>
                 <th>FCF TTM</th>
                 <th>P/FCF</th>
+                <th>P/E</th>
                 <th></th>
             </tr>
         </thead>
@@ -127,6 +128,13 @@
                 <td>
                     {% if stock.p_fcf is not none %}
                         {{ stock.p_fcf }}x
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    {% if stock.pe is not none %}
+                        {{ stock.pe }}x
                     {% else %}
                         —
                     {% endif %}
