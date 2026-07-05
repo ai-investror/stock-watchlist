@@ -83,6 +83,8 @@
                 <th>FCF TTM</th>
                 <th>P/FCF</th>
                 <th>P/E</th>
+                <th>Buffett Buy Price</th>
+                <th>Chance of 10x</th>
                 <th></th>
             </tr>
         </thead>
@@ -138,6 +140,24 @@
                     {% else %}
                         —
                     {% endif %}
+                </td>
+                <td class="editable" data-ticker="{{ stock.ticker }}" data-field="buffett_buy_price" data-value="{{ stock.buffett_buy_price if stock.buffett_buy_price is not none else '' }}">
+                    <span class="display-val">
+                        {% if stock.buffett_buy_price is not none %}
+                            ${{ "%.2f"|format(stock.buffett_buy_price) }}
+                        {% else %}
+                            <span style="color:#bbb">click to set</span>
+                        {% endif %}
+                    </span>
+                </td>
+                <td class="editable" data-ticker="{{ stock.ticker }}" data-field="chance_of_10x" data-value="{{ stock.chance_of_10x if stock.chance_of_10x is not none else '' }}">
+                    <span class="display-val">
+                        {% if stock.chance_of_10x is not none %}
+                            {{ "%.0f"|format(stock.chance_of_10x) }}%
+                        {% else %}
+                            <span style="color:#bbb">click to set</span>
+                        {% endif %}
+                    </span>
                 </td>
                 <td>
                     <a href="/delete/{{ stock.ticker }}"><button class="delete-btn">Remove</button></a>
@@ -208,6 +228,65 @@
             th.addEventListener('click', () => sortTable(i));
         });
     })();
+
+    document.querySelectorAll('td.editable').forEach(function(cell) {
+        cell.style.cursor = 'pointer';
+        cell.title = 'Click to edit';
+
+        cell.addEventListener('click', function() {
+            if (cell.querySelector('input')) return;
+
+            const ticker = cell.dataset.ticker;
+            const field = cell.dataset.field;
+            const currentVal = cell.dataset.value;
+
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = '0';
+            input.step = field === 'chance_of_10x' ? '1' : '0.01';
+            input.value = currentVal;
+            input.style.cssText = 'width: 90px; padding: 2px 6px; border: 1px solid #0070f3; border-radius: 4px; font-size: 0.95rem; outline: none;';
+
+            cell.innerHTML = '';
+            cell.appendChild(input);
+            input.focus();
+            input.select();
+
+            let saved = false;
+
+            function restoreDisplay(val) {
+                let text;
+                if (val === '' || val === null) {
+                    text = '<span style="color:#bbb">click to set</span>';
+                } else if (field === 'buffett_buy_price') {
+                    text = '$' + parseFloat(val).toFixed(2);
+                } else {
+                    text = parseFloat(val).toFixed(0) + '%';
+                }
+                cell.innerHTML = '<span class="display-val">' + text + '</span>';
+            }
+
+            function save() {
+                if (saved) return;
+                saved = true;
+                const val = input.value.trim();
+                fetch('/update/' + ticker, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ [field]: val })
+                }).then(function(r) { return r.json(); }).then(function() {
+                    cell.dataset.value = val;
+                    restoreDisplay(val);
+                });
+            }
+
+            input.addEventListener('blur', save);
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') input.blur();
+                if (e.key === 'Escape') { saved = true; restoreDisplay(currentVal); }
+            });
+        });
+    });
 </script>
 </body>
 </html>
