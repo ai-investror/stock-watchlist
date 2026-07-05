@@ -81,6 +81,7 @@
                 <th>Change %</th>
                 <th>Mkt Cap</th>
                 <th>FCF TTM</th>
+                <th>P/FCF</th>
                 <th></th>
             </tr>
         </thead>
@@ -119,6 +120,13 @@
                 <td>
                     {% if stock.fcf_billions is not none %}
                         ${{ stock.fcf_billions }}B
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    {% if stock.p_fcf is not none %}
+                        {{ stock.p_fcf }}x
                     {% else %}
                         —
                     {% endif %}
