@@ -53,6 +53,9 @@ def get_stock_data(item):
         pe = info.get('trailingPE')
         pe = round(pe, 1) if pe is not None else None
 
+        buffett_buy_price = item.get('buffett_buy_price')
+        gap_from_buffett = round(((price - buffett_buy_price) / buffett_buy_price) * 100, 1) if (price is not None and buffett_buy_price is not None and buffett_buy_price > 0) else None
+
         return {
             'ticker': ticker,
             'name': name,
@@ -62,7 +65,8 @@ def get_stock_data(item):
             'mkt_cap_billions': mkt_cap_billions,
             'p_fcf': p_fcf,
             'pe': pe,
-            'buffett_buy_price': item.get('buffett_buy_price'),
+            'buffett_buy_price': buffett_buy_price,
+            'gap_from_buffett': gap_from_buffett,
             'chance_of_10x': item.get('chance_of_10x'),
         }
     except Exception as e:
@@ -77,6 +81,7 @@ def get_stock_data(item):
             'p_fcf': None,
             'pe': None,
             'buffett_buy_price': item.get('buffett_buy_price'),
+            'gap_from_buffett': None,
             'chance_of_10x': item.get('chance_of_10x'),
         }
 
