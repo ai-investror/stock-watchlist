@@ -56,8 +56,9 @@ def get_stock_data(ticker):
             'p_fcf': p_fcf,
             'pe': pe,
         }
-    except Exception:
-        return {'ticker': ticker, 'name': ticker, 'price': None, 'change_pct': None, 'fcf_billions': None, 'mkt_cap_billions': None}
+    except Exception as e:
+        print(f"Error fetching {ticker}: {e}")
+        return {'ticker': ticker, 'name': ticker, 'price': None, 'change_pct': None, 'fcf_billions': None, 'mkt_cap_billions': None, 'p_fcf': None, 'pe': None}
 
 
 @app.route('/')
