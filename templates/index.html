@@ -149,5 +149,65 @@
     {% else %}
     <p class="empty">No stocks yet — add a ticker above to get started.</p>
     {% endif %}
+<script>
+    (function () {
+        const table = document.querySelector('table');
+        if (!table) return;
+
+        const headers = table.querySelectorAll('th');
+        let sortCol = -1;
+        let sortAsc = true;
+
+        function parseValue(td, colIndex) {
+            if (colIndex === 0) {
+                const strong = td.querySelector('strong');
+                return strong ? strong.textContent.trim() : td.textContent.trim();
+            }
+            const text = td.textContent.trim();
+            if (text === '—') return null;
+            const cleaned = text.replace(/[$B%x+]/g, '').trim();
+            const num = parseFloat(cleaned);
+            return isNaN(num) ? text : num;
+        }
+
+        function sortTable(colIndex) {
+            sortAsc = sortCol === colIndex ? !sortAsc : true;
+            sortCol = colIndex;
+
+            headers.forEach((th, i) => {
+                const ind = th.querySelector('.sort-ind');
+                if (ind) ind.textContent = i === sortCol ? (sortAsc ? ' ↑' : ' ↓') : '';
+            });
+
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            rows.sort((a, b) => {
+                const tds = (row) => row.querySelectorAll('td');
+                const aVal = parseValue(tds(a)[colIndex], colIndex);
+                const bVal = parseValue(tds(b)[colIndex], colIndex);
+
+                if (aVal === null && bVal === null) return 0;
+                if (aVal === null) return 1;
+                if (bVal === null) return -1;
+
+                if (typeof aVal === 'string') return sortAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                return sortAsc ? aVal - bVal : bVal - aVal;
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        headers.forEach((th, i) => {
+            if (i === headers.length - 1) return;
+            th.style.cursor = 'pointer';
+            th.style.userSelect = 'none';
+            const ind = document.createElement('span');
+            ind.className = 'sort-ind';
+            th.appendChild(ind);
+            th.addEventListener('click', () => sortTable(i));
+        });
+    })();
+</script>
 </body>
 </html>
