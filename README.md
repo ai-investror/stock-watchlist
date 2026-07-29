@@ -13,6 +13,5 @@ A personal web app for tracking stocks I'm interested in.
 ## Planned features
 - Multi-stage growth inputs to calculate intrinsic value
 - Price alerts
-- Persistent watchlist storage
 
-*Built as a learning project using Python, Flask, and yfinance.*
+*Built as a learning project using Python, Flask, yfinance, and Supabase.*
