@@ -1,28 +1,16 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
+from supabase import create_client
 import yfinance as yf
-import json
 import os
 
 app = Flask(__name__)
 
-WATCHLIST_FILE = 'watchlist.json'
+supabase = create_client(os.environ['SUPABASE_URL'], os.environ['SUPABASE_KEY'])
 
 
 def load_watchlist():
-    if os.path.exists(WATCHLIST_FILE):
-        with open(WATCHLIST_FILE) as f:
-            data = json.load(f)
-        # Migrate old format (list of strings) to new format (list of dicts)
-        if data and isinstance(data[0], str):
-            data = [{'ticker': t, 'buffett_buy_price': None, 'chance_of_10x': None} for t in data]
-            save_watchlist(data)
-        return data
-    return []
-
-
-def save_watchlist(watchlist):
-    with open(WATCHLIST_FILE, 'w') as f:
-        json.dump(watchlist, f)
+    result = supabase.table('watchlist').select('*').execute()
+    return result.data
 
 
 def get_stock_data(item):
@@ -97,34 +85,27 @@ def index():
 def add():
     ticker = request.form.get('ticker', '').upper().strip()
     if ticker:
-        watchlist = load_watchlist()
-        existing = [w['ticker'] for w in watchlist]
-        if ticker not in existing:
-            watchlist.append({'ticker': ticker, 'buffett_buy_price': None, 'chance_of_10x': None})
-            save_watchlist(watchlist)
+        existing = supabase.table('watchlist').select('ticker').eq('ticker', ticker).execute()
+        if not existing.data:
+            supabase.table('watchlist').insert({'ticker': ticker}).execute()
     return redirect(url_for('index'))
 
 
 @app.route('/delete/<ticker>')
 def delete(ticker):
-    watchlist = load_watchlist()
-    watchlist = [w for w in watchlist if w['ticker'] != ticker]
-    save_watchlist(watchlist)
+    supabase.table('watchlist').delete().eq('ticker', ticker).execute()
     return redirect(url_for('index'))
 
 
 @app.route('/update/<ticker>', methods=['POST'])
 def update(ticker):
-    watchlist = load_watchlist()
     data = request.get_json()
-    for item in watchlist:
-        if item['ticker'] == ticker:
-            for field in ('buffett_buy_price', 'chance_of_10x'):
-                if field in data:
-                    val = data[field]
-                    item[field] = float(val) if val != '' else None
-            break
-    save_watchlist(watchlist)
+    update_data = {}
+    for field in ('buffett_buy_price', 'chance_of_10x'):
+        if field in data:
+            val = data[field]
+            update_data[field] = float(val) if val != '' else None
+    supabase.table('watchlist').update(update_data).eq('ticker', ticker).execute()
     return jsonify({'ok': True})
 
 
