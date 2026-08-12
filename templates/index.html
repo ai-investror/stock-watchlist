@@ -99,6 +99,8 @@
                 <th>Ticker</th>
                 <th>Last Price</th>
                 <th>Change %</th>
+                <th>6M Return</th>
+                <th>1Y Return</th>
                 <th>Mkt Cap</th>
                 <th>Revenue TTM</th>
                 <th>Earnings TTM</th>
@@ -111,6 +113,7 @@
                 <th>Rev Growth (3yr)</th>
                 <th>Earn Growth (3yr)</th>
                 <th>Buffett Buy Price</th>
+                <th>Date Set</th>
                 <th>Gap from Buffett</th>
                 <th>Chance of 10x</th>
                 <th></th>
@@ -136,6 +139,24 @@
                     {% if stock.change_pct is not none %}
                         <span class="{{ 'positive' if stock.change_pct >= 0 else 'negative' }}">
                             {{ '+' if stock.change_pct >= 0 else '' }}{{ "%.2f"|format(stock.change_pct) }}%
+                        </span>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    {% if stock.return_6m is not none %}
+                        <span class="{{ 'positive' if stock.return_6m >= 0 else 'negative' }}">
+                            {{ '+' if stock.return_6m > 0 else '' }}{{ stock.return_6m }}%
+                        </span>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    {% if stock.return_1y is not none %}
+                        <span class="{{ 'positive' if stock.return_1y >= 0 else 'negative' }}">
+                            {{ '+' if stock.return_1y > 0 else '' }}{{ stock.return_1y }}%
                         </span>
                     {% else %}
                         —
@@ -228,6 +249,15 @@
                     <span class="display-val">
                         {% if stock.buffett_buy_price is not none %}
                             ${{ "%.2f"|format(stock.buffett_buy_price) }}
+                        {% else %}
+                            <span style="color:#bbb">click to set</span>
+                        {% endif %}
+                    </span>
+                </td>
+                <td class="editable" data-ticker="{{ stock.ticker }}" data-field="buffett_buy_price_date" data-value="{{ stock.buffett_buy_price_date if stock.buffett_buy_price_date is not none else '' }}">
+                    <span class="display-val">
+                        {% if stock.buffett_buy_price_date is not none %}
+                            {{ stock.buffett_buy_price_date }}
                         {% else %}
                             <span style="color:#bbb">click to set</span>
                         {% endif %}
@@ -333,12 +363,15 @@
             const field = cell.dataset.field;
             const currentVal = cell.dataset.value;
 
+            const isDate = field === 'buffett_buy_price_date';
             const input = document.createElement('input');
-            input.type = 'number';
-            input.min = '0';
-            input.step = field === 'chance_of_10x' ? '1' : '0.01';
+            input.type = isDate ? 'date' : 'number';
+            if (!isDate) {
+                input.min = '0';
+                input.step = field === 'chance_of_10x' ? '1' : '0.01';
+            }
             input.value = currentVal;
-            input.style.cssText = 'width: 90px; padding: 2px 6px; border: 1px solid #0070f3; border-radius: 4px; font-size: 0.95rem; outline: none;';
+            input.style.cssText = 'width: ' + (isDate ? '130px' : '90px') + '; padding: 2px 6px; border: 1px solid #0070f3; border-radius: 4px; font-size: 0.95rem; outline: none;';
 
             cell.innerHTML = '';
             cell.appendChild(input);
@@ -353,6 +386,8 @@
                     text = '<span style="color:#bbb">click to set</span>';
                 } else if (field === 'buffett_buy_price') {
                     text = '$' + parseFloat(val).toFixed(2);
+                } else if (field === 'buffett_buy_price_date') {
+                    text = val;
                 } else {
                     text = parseFloat(val).toFixed(0) + '%';
                 }

@@ -26,7 +26,7 @@ def get_stock_data(item):
     try:
         stock = yf.Ticker(ticker)
 
-        hist = stock.history(period='5d')
+        hist = stock.history(period='1y')
         print(f"{ticker}: hist rows={len(hist)}")
         if len(hist) >= 2:
             price = round(float(hist['Close'].iloc[-1]), 2)
@@ -38,6 +38,16 @@ def get_stock_data(item):
         else:
             price = None
             change_pct = None
+
+        return_6m = None
+        return_1y = None
+        if price is not None:
+            if len(hist) >= 127:
+                price_6m_ago = float(hist['Close'].iloc[-127])
+                return_6m = round(((price - price_6m_ago) / price_6m_ago) * 100, 1)
+            if len(hist) >= 2:
+                price_1y_ago = float(hist['Close'].iloc[0])
+                return_1y = round(((price - price_1y_ago) / price_1y_ago) * 100, 1)
 
         info = stock.info
         name = info.get('longName') or info.get('shortName') or ticker
@@ -114,6 +124,8 @@ def get_stock_data(item):
             'name': name,
             'price': price,
             'change_pct': change_pct,
+            'return_6m': return_6m,
+            'return_1y': return_1y,
             'mkt_cap_billions': mkt_cap_billions,
             'revenue_billions': revenue_billions,
             'net_income_billions': net_income_billions,
@@ -126,6 +138,7 @@ def get_stock_data(item):
             'rev_growth_3yr': rev_growth_3yr,
             'earn_growth_3yr': earn_growth_3yr,
             'buffett_buy_price': buffett_buy_price,
+            'buffett_buy_price_date': item.get('buffett_buy_price_date'),
             'gap_from_buffett': gap_from_buffett,
             'chance_of_10x': item.get('chance_of_10x'),
         }
@@ -136,6 +149,8 @@ def get_stock_data(item):
             'name': ticker,
             'price': None,
             'change_pct': None,
+            'return_6m': None,
+            'return_1y': None,
             'mkt_cap_billions': None,
             'revenue_billions': None,
             'net_income_billions': None,
@@ -148,6 +163,7 @@ def get_stock_data(item):
             'rev_growth_3yr': None,
             'earn_growth_3yr': None,
             'buffett_buy_price': item.get('buffett_buy_price'),
+            'buffett_buy_price_date': item.get('buffett_buy_price_date'),
             'gap_from_buffett': None,
             'chance_of_10x': item.get('chance_of_10x'),
         }
@@ -184,6 +200,9 @@ def update(ticker):
         if field in data:
             val = data[field]
             update_data[field] = float(val) if val != '' else None
+    if 'buffett_buy_price_date' in data:
+        val = data['buffett_buy_price_date']
+        update_data['buffett_buy_price_date'] = val if val != '' else None
     supabase.table('watchlist').update(update_data).eq('ticker', ticker).execute()
     return jsonify({'ok': True})
 
