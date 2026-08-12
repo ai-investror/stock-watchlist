@@ -4,12 +4,16 @@ A personal web app for tracking stocks I'm interested in.
 
 ## Current features
 - Add and remove ticker symbols
-- See the latest price, today's change %, market cap, and key financials for each stock:
+- See the latest price and key price data for each stock:
+  - Last Price, Change %, 6 Month Return, 1 Year Return
+- See key financials for each stock:
   - Revenue TTM, Earnings TTM, Net Profit Margin
   - Free Cash Flow (TTM), Cash Conversion Ratio
   - P/FCF, P/E, ROIC (Return on Invested Capital)
   - Revenue Growth (3yr) and Earnings Growth (3yr)
-- Manually set a Buffett Buy Price and Chance of 10x per stock (click any cell to edit)
+- Manually set per stock (click any cell to edit, saved permanently):
+  - Buffett Buy Price and the date it was calculated
+  - Chance of 10x
 - Automatically calculates the gap between current price and your Buffett Buy Price
 - Sort by any column — click a header to sort ascending, click again for descending
 - Ticker column and header row stay frozen when scrolling
@@ -20,6 +24,7 @@ A personal web app for tracking stocks I'm interested in.
 - Backward P/E based on historical earnings growth
 - Projected P/E based on projected earnings growth
 - Analyst forward estimates for revenue and earnings growth
+- Parallel fetching to speed up page load
 - Price alerts
 
 *Built as a learning project using Python, Flask, yfinance, and Supabase.*
