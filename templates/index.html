@@ -307,7 +307,8 @@
                 return strong ? strong.textContent.trim() : td.textContent.trim();
             }
             const text = td.textContent.trim();
-            if (text === '—') return null;
+            if (text === '—' || text === 'click to set') return null;
+            if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
             const cleaned = text.replace(/[$B%x+]/g, '').trim();
             const num = parseFloat(cleaned);
             return isNaN(num) ? text : num;
