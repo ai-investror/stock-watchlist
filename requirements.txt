@@ -2,3 +2,4 @@ flask
 yfinance
 gunicorn
 supabase
+python-dotenv
