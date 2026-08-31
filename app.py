@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from supabase import create_client
-from concurrent.futures import ThreadPoolExecutor
 import yfinance as yf
 import pandas as pd
 import os
@@ -28,6 +27,7 @@ def get_stock_data(item):
         stock = yf.Ticker(ticker)
 
         hist = stock.history(period='1y')
+        hist = hist.dropna(subset=['Close'])
         print(f"{ticker}: hist rows={len(hist)}")
         if len(hist) >= 2:
             price = round(float(hist['Close'].iloc[-1]), 2)
@@ -173,8 +173,7 @@ def get_stock_data(item):
 @app.route('/')
 def index():
     watchlist = load_watchlist()
-    with ThreadPoolExecutor(max_workers=8) as executor:
-        stocks = list(executor.map(get_stock_data, watchlist))
+    stocks = [get_stock_data(item) for item in watchlist]
     return render_template('index.html', stocks=stocks)
 
 
