@@ -17,14 +17,27 @@ A personal web app for tracking stocks I'm interested in.
 - Automatically calculates the gap between current price and your Buffett Buy Price
 - Sort by any column — click a header to sort ascending, click again for descending
 - Ticker column and header row stay frozen when scrolling
+- Parallel fetching (2 workers) for faster page load
 - Hosted at [intelligentinvestor-zb18.onrender.com](https://intelligentinvestor-zb18.onrender.com)
 
 ## Planned features
+- Switch data source from yfinance to Financial Modeling Prep (FMP) for reliable cloud hosting
+- Supabase caching for all financial data — instant page loads, no live API calls on every visit
+- Auto-refresh: daily prices, weekly returns, quarterly fundamentals (staggered to stay within free tier limits)
+- Manual per-stock refresh button for when earnings just came out
+- Analyst consensus growth projections (3yr and 5yr)
 - Fair P/E ratio based on comparable companies
 - Backward P/E based on historical earnings growth
 - Projected P/E based on projected earnings growth
-- Analyst forward estimates for revenue and earnings growth
-- Parallel fetching to speed up page load
 - Price alerts
 
-*Built as a learning project using Python, Flask, yfinance, and Supabase.*
+## Local development
+Copy `.env.example` to `.env` and fill in your credentials:
+```
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_key
+FMP_KEY=your_fmp_key
+```
+Then run: `python3 app.py`
+
+*Built as a learning project using Python, Flask, yfinance, Supabase, and Financial Modeling Prep.*
