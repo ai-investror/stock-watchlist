@@ -7,6 +7,7 @@ from datetime import datetime, date, timezone
 import requests
 import re
 import os
+import threading
 
 load_dotenv()
 
@@ -388,8 +389,10 @@ def index():
 
     stale_fund = [x for x in watchlist if is_stale_fundamentals(x)][:10]
     if stale_fund:
-        with ThreadPoolExecutor(max_workers=3) as ex:
-            ex.map(refresh_fundamentals, stale_fund)
+        def _run_fund(items):
+            with ThreadPoolExecutor(max_workers=3) as ex:
+                ex.map(refresh_fundamentals, items)
+        threading.Thread(target=_run_fund, args=(stale_fund,), daemon=True).start()
 
     watchlist = load_watchlist()
 
@@ -470,10 +473,12 @@ def update(ticker):
 @app.route('/refresh-all', methods=['POST'])
 def refresh_all():
     watchlist = load_watchlist()
-    with ThreadPoolExecutor(max_workers=3) as ex:
-        ex.map(refresh_daily, watchlist)
-    with ThreadPoolExecutor(max_workers=3) as ex:
-        ex.map(refresh_fundamentals, watchlist)
+    def _run_all(items):
+        with ThreadPoolExecutor(max_workers=3) as ex:
+            ex.map(refresh_daily, items)
+        with ThreadPoolExecutor(max_workers=3) as ex:
+            ex.map(refresh_fundamentals, items)
+    threading.Thread(target=_run_all, args=(watchlist,), daemon=True).start()
     return redirect(url_for('index'))
 
 
