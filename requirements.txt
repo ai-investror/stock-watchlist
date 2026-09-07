@@ -1,5 +1,6 @@
 flask
-yfinance
 gunicorn
 supabase
 python-dotenv
+requests
+beautifulsoup4

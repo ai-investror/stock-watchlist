@@ -80,6 +80,16 @@
             border-radius: 4px;
         }
         .delete-btn:hover { background: #fee2e2; color: #dc2626; border-color: #dc2626; }
+        .refresh-btn {
+            background: none;
+            color: #999;
+            border: 1px solid #ddd;
+            padding: 4px 10px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            margin-right: 4px;
+        }
+        .refresh-btn:hover { background: #e0f2fe; color: #0070f3; border-color: #0070f3; }
         .empty { color: #999; text-align: center; padding: 32px; }
     </style>
 </head>
@@ -112,6 +122,10 @@
                 <th>ROIC</th>
                 <th>Rev Growth (3yr)</th>
                 <th>Earn Growth (3yr)</th>
+                <th>EPS Growth (1yr)</th>
+                <th>Price Target</th>
+                <th>Upside %</th>
+                <th>Analyst Rating</th>
                 <th>Buffett Buy Price</th>
                 <th>Date Set</th>
                 <th>Gap from Buffett</th>
@@ -163,36 +177,36 @@
                     {% endif %}
                 </td>
                 <td>
-                    {% if stock.mkt_cap_billions is not none %}
-                        ${{ stock.mkt_cap_billions }}B
+                    {% if stock.mkt_cap is not none %}
+                        ${{ stock.mkt_cap }}B
                     {% else %}
                         —
                     {% endif %}
                 </td>
                 <td>
-                    {% if stock.revenue_billions is not none %}
-                        ${{ stock.revenue_billions }}B
+                    {% if stock.revenue is not none %}
+                        ${{ stock.revenue }}B
                     {% else %}
                         —
                     {% endif %}
                 </td>
                 <td>
-                    {% if stock.net_income_billions is not none %}
-                        ${{ stock.net_income_billions }}B
+                    {% if stock.net_income is not none %}
+                        ${{ stock.net_income }}B
                     {% else %}
                         —
                     {% endif %}
                 </td>
                 <td>
-                    {% if stock.net_margin_pct is not none %}
-                        {{ stock.net_margin_pct }}%
+                    {% if stock.net_margin is not none %}
+                        {{ stock.net_margin }}%
                     {% else %}
                         —
                     {% endif %}
                 </td>
                 <td>
-                    {% if stock.fcf_billions is not none %}
-                        ${{ stock.fcf_billions }}B
+                    {% if stock.fcf is not none %}
+                        ${{ stock.fcf }}B
                     {% else %}
                         —
                     {% endif %}
@@ -245,6 +259,40 @@
                         —
                     {% endif %}
                 </td>
+                <td>
+                    {% if stock.eps_growth_1yr is not none %}
+                        <span class="{{ 'positive' if stock.eps_growth_1yr >= 0 else 'negative' }}">
+                            {{ '+' if stock.eps_growth_1yr > 0 else '' }}{{ stock.eps_growth_1yr }}%
+                        </span>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    {% if stock.price_target is not none %}
+                        ${{ "%.2f"|format(stock.price_target) }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    {% if stock.upside_pct is not none %}
+                        <span class="{{ 'positive' if stock.upside_pct >= 0 else 'negative' }}">
+                            {{ '+' if stock.upside_pct > 0 else '' }}{{ stock.upside_pct }}%
+                        </span>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    {% if stock.analyst_rating %}
+                        <span class="{{ 'positive' if stock.analyst_rating == 'Buy' else ('negative' if stock.analyst_rating == 'Sell' else '') }}">
+                            {{ stock.analyst_rating }}
+                        </span>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
                 <td class="editable" data-ticker="{{ stock.ticker }}" data-field="buffett_buy_price" data-value="{{ stock.buffett_buy_price if stock.buffett_buy_price is not none else '' }}">
                     <span class="display-val">
                         {% if stock.buffett_buy_price is not none %}
@@ -282,6 +330,9 @@
                     </span>
                 </td>
                 <td>
+                    <form action="/refresh/{{ stock.ticker }}" method="POST" style="display:inline">
+                        <button class="refresh-btn" title="Force refresh all data for this stock">↻</button>
+                    </form>
                     <a href="/delete/{{ stock.ticker }}"><button class="delete-btn">Remove</button></a>
                 </td>
             </tr>

@@ -27,4 +27,20 @@ A personal web app for tracking stocks I'm interested in.
 - Parallel fetching to speed up page load
 - Price alerts
 
-*Built as a learning project using Python, Flask, yfinance, and Supabase.*
+## Branches & deployment
+
+This project runs two parallel versions so we can test changes safely before going live:
+
+| Branch | Render service | Data source | Notes |
+|--------|---------------|-------------|-------|
+| `main` | Production (live URL) | yfinance | Stable, works locally |
+| `fmp-migration` | Test service (separate URL) | stockanalysis.com scraper | In development |
+
+**How switching works:**
+- To run the yfinance version locally: `git checkout main`
+- The production Render service always stays on `main` until a deliberate merge
+- The test Render service runs `fmp-migration` independently
+
+**Merge plan:** Once `fmp-migration` has been tested on the test Render service for an acceptable period, it will be merged into `main` — at which point the production service auto-updates. Until then, both versions remain independently reachable.
+
+*Built as a learning project using Python, Flask, and Supabase.*
