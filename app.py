@@ -467,6 +467,16 @@ def update(ticker):
     return jsonify({'ok': True})
 
 
+@app.route('/refresh-all', methods=['POST'])
+def refresh_all():
+    watchlist = load_watchlist()
+    with ThreadPoolExecutor(max_workers=3) as ex:
+        ex.map(refresh_daily, watchlist)
+    with ThreadPoolExecutor(max_workers=3) as ex:
+        ex.map(refresh_fundamentals, watchlist)
+    return redirect(url_for('index'))
+
+
 @app.route('/refresh/<ticker>', methods=['POST'])
 def refresh_stock(ticker):
     watchlist = load_watchlist()
